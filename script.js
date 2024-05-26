@@ -81,11 +81,23 @@ function createIcon(classes) {
 }
 
 function addItemToStorage(item) {
-	const itemsFromStorage = getItemsFromLocalStorage();
+	const itemsFromLocalStorage = getItemsFromLocalStorage();
 
-	itemsFromStorage.push(item);
+	itemsFromLocalStorage.push(item);
 
-	localStorage.setItem('items', JSON.stringify(itemsFromStorage));
+	localStorage.setItem('items', JSON.stringify(itemsFromLocalStorage));
+}
+
+function removeItemFromLocalStorage(itemName) {
+	let itemsFromLocalStorage = getItemsFromLocalStorage();
+
+	// filter out the local storage items by the item name
+	itemsFromLocalStorage = itemsFromLocalStorage.filter(
+		item => item !== itemName
+	);
+
+	// persist the new items in local storage
+	localStorage.setItem('items', JSON.stringify(itemsFromLocalStorage));
 }
 
 function getItemsFromLocalStorage() {
@@ -100,16 +112,24 @@ function getItemsFromLocalStorage() {
 	return itemsFromStorage;
 }
 
-// remove an item
-function removeItem(e) {
+function onClickItem(e) {
 	if (e.target.parentElement.classList.contains('remove-item')) {
-		if (confirm('Are you sure?')) {
-			e.target.parentElement.parentElement.remove();
-		}
-
-		// check if the list item is empty after an item was removed
-		checkUI();
+		removeItem(e.target.parentElement.parentElement);
 	}
+}
+
+// remove an item
+function removeItem(item) {
+	// remove form DOM
+	if (confirm('Are you sure?')) {
+		item.remove();
+	}
+
+	// remove from local storage
+	removeItemFromLocalStorage(item.textContent);
+
+	// check if the list item is empty after an item was removed
+	checkUI();
 }
 
 // clear all items
@@ -169,7 +189,7 @@ function checkItemExists(itemName) {
 
 // event listeners
 itemForm.addEventListener('submit', onAddItemSubmit);
-itemList.addEventListener('click', removeItem);
+itemList.addEventListener('click', onClickItem);
 clearBtn.addEventListener('click', clearItems);
 itemFilter.addEventListener('input', filterItems);
 document.addEventListener('DOMContentLoaded', displayItems);
