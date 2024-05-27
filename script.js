@@ -3,6 +3,17 @@ const itemInput = document.getElementById('item-input');
 const itemList = document.getElementById('item-list');
 const clearBtn = document.getElementById('clear');
 const itemFilter = document.getElementById('filter');
+const formBtn = itemForm.querySelector('button');
+let isEditMode = false;
+
+// change the state of the form button
+itemInput.addEventListener('input', e => {
+	if (isEditMode) {
+		formBtn.style.backgroundColor = '#1aaf22';
+		formBtn.innerHTML = `<i class="fa-solid fa-check"></i> Save changes`;
+		console.log('Item input listener ||| ');
+	}
+});
 
 // display items when page loads
 function displayItems() {
@@ -30,6 +41,18 @@ function onAddItemSubmit(e) {
 		alert('Please enter the name of an item first');
 
 		return;
+	}
+
+	// check if it is edit mode
+	if (isEditMode) {
+		const itemToEdit = itemList.querySelector('.edit-mode');
+
+		removeItemFromLocalStorage(itemToEdit.textContent);
+
+		itemToEdit.classList.remove('edit-mode');
+		itemToEdit.remove();
+
+		isEditMode = false;
 	}
 
 	// check it exists
@@ -115,7 +138,30 @@ function getItemsFromLocalStorage() {
 function onClickItem(e) {
 	if (e.target.parentElement.classList.contains('remove-item')) {
 		removeItem(e.target.parentElement.parentElement);
+	} else {
+		if (e.target.nodeName === 'UL') {
+			return;
+		} else {
+			setItemToEdit(e.target);
+		}
 	}
+}
+
+// edit item
+function setItemToEdit(item) {
+	isEditMode = true;
+
+	itemList.querySelectorAll('li').forEach(li => {
+		li.classList.remove('edit-mode');
+	});
+
+	item.classList.add('edit-mode');
+
+	formBtn.innerHTML = `<i class="fa-solid fa-pen"></i> Edit item`;
+
+	formBtn.style.backgroundColor = '#3168ce';
+
+	itemInput.value = item.textContent;
 }
 
 // remove an item
@@ -170,6 +216,12 @@ function checkUI() {
 		itemFilter.style.display = 'block';
 		clearBtn.style.display = 'block';
 	}
+
+	// change the form button state to normal
+	formBtn.style.backgroundColor = '#333';
+	formBtn.innerHTML = `<i class="fa-solid fa-plus"></i> Add item`;
+
+	isEditMode = false;
 }
 
 // check item already in the list
